@@ -1,4 +1,4 @@
-import { OrbitControls } from "https://cdn.skypack.dev/three@0.132.2/examples/jsm/controls/OrbitControls.js";
+import {OrbitControls} from "https://cdn.skypack.dev/three@0.132.2/examples/jsm/controls/OrbitControls.js";
 import * as THREE from "https://cdn.skypack.dev/three@0.132.2";
 
 // Création de la scène
@@ -21,6 +21,33 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 
 document.body.appendChild(renderer.domElement);
 
+
+// Création d'une entité
+
+const entity = {
+  model: new THREE.Mesh((new THREE.BoxGeometry(50, 100, 50)).translate(0, 50, 0)),
+  position: {
+    x: 0,
+    y: 0,
+    z: 0
+  },
+  color: "red",
+
+  moveCharacter: function (intersect) {
+    this.model.position.copy(intersect.point).add(intersect.face.normal);
+    this.model.position.divideScalar(50).floor().multiplyScalar(50).addScalar(25);
+    this.model.position.y = 0;
+    this.position.x = this.model.position.x;
+    this.position.z = this.model.position.z;
+
+    camera.position.z = 500;
+    camera.position.y = 250;
+    camera.lookAt(this.position.x, this.position.y, this.position.z);
+  }
+}
+
+scene.add(entity.model);
+
 // Création du plan
 // Création de la grille
 
@@ -32,7 +59,7 @@ geometry.rotateX(-Math.PI / 2);
 
 const plane = new THREE.Mesh(
   geometry,
-  new THREE.MeshBasicMaterial({ visible: false })
+  new THREE.MeshBasicMaterial({visible: false})
 );
 scene.add(plane);
 
@@ -84,7 +111,7 @@ scene.add(rollOverMesh);
 // Déplacement du personnage
 
 function moveCharacter(event) {
-    
+
 }
 
 // Affichage au survol
@@ -101,14 +128,13 @@ function onPointerMove(event) {
 
   if (intersects.length > 0) {
     const intersect = intersects[0];
-
+    if (intersect.point.y !== 0) return
     rollOverMesh.position.copy(intersect.point).add(intersect.face.normal);
     rollOverMesh.position
       .divideScalar(50)
       .floor()
       .multiplyScalar(50)
       .addScalar(25);
-
     render();
   }
 }
@@ -127,13 +153,10 @@ function onPointerDown(event) {
 
   if (intersects.length > 0) {
     const intersect = intersects[0];
+    // const voxel = new THREE.Mesh(cubeGeo, cubeMaterial);
+    // voxel.position.copy(intersect.point).add(intersect.face.normal);
+    entity.moveCharacter(intersect)
 
-    const voxel = new THREE.Mesh(cubeGeo, cubeMaterial);
-    voxel.position.copy(intersect.point).add(intersect.face.normal);
-    voxel.position.divideScalar(50).floor().multiplyScalar(50).addScalar(25);
-    scene.add(voxel);
-
-    objects.push(voxel);
 
     render();
   }
